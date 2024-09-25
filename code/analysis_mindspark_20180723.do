@@ -83,34 +83,45 @@ if $establishglobals==1 {
 		global	projects	${research}Projects/Ongoing/
 		global	ms			${projects}Mindspark_Study/
 	}
-	z	
+	
+	global mindspark "C:/Users/pz61/Documents/GitHub/disrupting-educ-2/"
+	
 ///	folder globals
 
-	global	bl			${mindspark}3_Data_processing/Baseline/
-	global	el			${mindspark}3_Data_processing/Endline/
-	global	ms			${mindspark}3_Data_processing/Mindspark/
-	global	sc			${mindspark}3_Data_processing/Schools/
-	global	hh			${mindspark}3_Data_processing/Household/
+	global	bl			${mindspark}data/
+	global	el			${mindspark}data/
+	global	ms			${mindspark}data/
+	global	sc			${mindspark}data/
+	global	hh			${mindspark}data/
 	
-	global	graphs		${mindspark}4_Data_analysis/Graphs/
-	global	tables		${mindspark}4_Data_analysis/Tables/
+	global	graphs		${mindspark}out/graphs/
+	global	tables		${mindspark}out/tables/
+	
+	
 
 ///	subfolder globals
 
-	global	bl_temp		${bl}Temp/
-	global	bl_clean	${bl}Clean/
+	global	bl_temp		${mindspark}data/
+	global	bl_clean	${mindspark}data/
 	
-	global	el_temp		${el}Temp/
-	global	el_clean	${el}Clean/
+	global	el_temp		${mindspark}data/
+	global	el_clean	${mindspark}data/
 	
-	global	ms_temp		${ms}Temp/
-	global	ms_clean	${ms}Clean/
+	global	ms_temp		${mindspark}data/
+	global	ms_clean	${mindspark}data/
 	
-	global	sc_temp		${sc}Temp/
-	global	sc_clean	${sc}Clean/
+	global	sc_temp		${mindspark}data/
+	global	sc_clean	${mindspark}data/
 	
-	global	hh_temp		${hh}Temp/
-	global	hh_clean	${hh}Clean/
+	global	hh_temp		${mindspark}data/
+	global	hh_clean	${mindspark}data/
+	
+	
+	*Create local ado file
+	sysdir set PLUS "${mindspark}/ado"
+	
+	adopath ++ PLUS
+	adopath ++ BASE
 		
 }
 // ****************** GENERATE TABLES ****************** //
@@ -355,6 +366,7 @@ if $gentables==1 {
 	/// load school results
 	
 		use ${sc_clean}sc_results, clear
+		rename school schoolid
 		
 	///	keep 2015-2016 school year
 	
@@ -512,7 +524,7 @@ if $gentables==1 {
 	
 	/// load sgi data
 	
-		use ${ms_clean}ms_ei_sgi, clear
+		use ${ms_clean}ms_ei_, clear
 							
 	///	drop duplicates
 		
@@ -570,6 +582,7 @@ if $gentables==1 {
 	/// load school results
 	
 		use ${sc_clean}sc_results, clear
+		rename school schoolid
 
 	///	gen dummy for non-rct students
 		
@@ -772,7 +785,7 @@ if $gentables==1 {
 
 	/// load sgi data
 	
-		use ${ms_clean}ms_ei_sgi, clear
+		use ${ms_clean}ms_ei, clear
 		
 	/// gen mean attendance by date
 	
@@ -784,7 +797,7 @@ if $gentables==1 {
 		
 	///	drop duplicates
 		
-		duplicates drop ms_id, force
+		duplicates drop st_id, force
 		/* ajg: multiple obs per st_id due to individual attendance data,
 		dropping here because i only need aggregate attendance data */	
 	
@@ -800,9 +813,9 @@ if $gentables==1 {
 
 	///	merge w/cal data
 	
-		mer 1:1 ms_id using ${ms_clean}ms_ei_cal
+		*mer 1:1 ms_id using ${ms_clean}ms_ei_cal
 		*ajg: 46 not matched (0 from using)
-		tab att_tot if _m!=3
+		*tab att_tot if _m!=3
 		*ajg: these are students with little or no attendance
 		
 	///	replace cal attendance data for these students
@@ -1173,7 +1186,7 @@ if $gengraphs==1 {
 
 	/// load sgi data
 	
-		use ${ms_clean}ms_ei_sgi, clear
+		use ${ms_clean}ms_ei, clear
 		
 	///	drop duplicates
 		
@@ -1225,15 +1238,15 @@ if $gengraphs==1 {
 
 	///	drop duplicates
 
-		duplicates drop ms_id, force
+		duplicates drop st_id, force
 	
 	///	merge with ms roster
 	
-		mer 1:1 ms_id using ${ms_clean}ms_roster, nogen keep(match)
+		*mer 1:1 st_id using ${ms_clean}ms_roster, nogen keep(match)
 	
 	///	merge with ms math questions
 	
-		mer 1:m ms_id using ${ms_clean}ms_mathqs, nogen keep(match)
+		mer 1:m st_id using ${ms_clean}ms_mathqs, nogen keep(match)
 	
 	///	gen ms levels
 	
@@ -1318,15 +1331,15 @@ if $gengraphs==1 {
 
 	///	drop duplicates
 
-		duplicates drop ms_id, force
+		duplicates drop st_id, force
 	
 	///	merge with ms roster
 	
-		mer 1:1 ms_id using ${ms_clean}ms_roster, nogen keep(match)
+		*mer 1:1 st_id using ${ms_clean}ms_roster, nogen keep(match)
 	
 	///	merge with ms hindi questions
 	
-		mer 1:m ms_id using ${ms_clean}ms_hindiqs, nogen keep(match)
+		mer 1:m st_id using ${ms_clean}ms_hindiqs, nogen keep(match)
 		
 	///	gen ms levels
 
@@ -1361,6 +1374,7 @@ if $gengraphs==1 {
 	/// load school results
 	
 		use ${sc_clean}sc_results, clear
+		rename school schoolid
 
 	///	gen dummy for rct students
 		
@@ -1427,7 +1441,7 @@ if $gengraphs==1 {
 
 	/// load sgi data
 	
-		use ${ms_clean}ms_ei_sgi, clear
+		use ${ms_clean}ms_ei, clear
 	
 	///	drop duplicates
 		
@@ -1451,7 +1465,7 @@ if $gengraphs==1 {
 
 	///	drop duplicates
 
-		duplicates drop ms_id, force
+		duplicates drop st_id, force
 
 	/// merge w/j-pal data wide
 
@@ -1497,11 +1511,11 @@ if $gengraphs==1 {
 
 		///	drop duplicates
 
-			duplicates drop ms_id, force
+			duplicates drop st_id, force
 
 		///	merge with ms math questions
 		
-			mer 1:m ms_id using ${ms_clean}ms_mathqs, nogen keep(match)
+			mer 1:m st_id using ${ms_clean}ms_mathqs, nogen keep(match)
 
 		///	restrict to observations before feb 5, 2016 
 			*ajg: endline was administered on feb 7, 2016
@@ -1555,11 +1569,11 @@ if $gengraphs==1 {
 		
 		///	drop duplicates
 
-			duplicates drop ms_id, force
+			duplicates drop st_id, force
 
 		///	merge with ms hindi questions
 		
-			mer 1:m ms_id using ${ms_clean}ms_hindiqs, nogen keep(match)
+			mer 1:m st_id using ${ms_clean}ms_hindiqs, nogen keep(match)
 
 		///	restrict to observations before feb 5, 2016 
 			*ajg: endline was administered on feb 7, 2016
@@ -1637,8 +1651,8 @@ if $gengraphs==1 {
 		save `main'	
 
 		*	Proportion correct
-		egen rawsc_math=rowtotal(qm*)
-		egen rawsc_hindi=rowtotal(qh*)
+		egen rawsc_math=rowtotal(cm*)
+		egen rawsc_hindi=rowtotal(ch*)
 
 		gen prop_m=rawsc_m/35 if round==2 & st_grade>7 & st_grade~=.
 			replace prop_m=rawsc_m/34 if round==2 & st_grade<8
