@@ -55,8 +55,8 @@
 
 clear all
 set more off
-set seed 12345
 version 13.1
+set seed 12345
 
 global	establishglobals 	"1"
 global	gentables			"1"
@@ -83,45 +83,41 @@ if $establishglobals==1 {
 		global	projects	${research}Projects/Ongoing/
 		global	ms			${projects}Mindspark_Study/
 	}
+	if c(username) == "tcejka" {
+		global	mindspark	"/Users/tcejka/Documents/repo/rep_disrupting_educ/"
+	}
 	
-	global mindspark "C:/Users/pz61/Documents/GitHub/disrupting-educ-2/"
-	
+	global mindspark "C:\Users\luizaandrade\Documents\GitHub\rep_disrupting_educ/"
+		
 ///	folder globals
 
-	global	bl			${mindspark}data/
-	global	el			${mindspark}data/
-	global	ms			${mindspark}data/
-	global	sc			${mindspark}data/
-	global	hh			${mindspark}data/
+	global data 		${mindspark}data/
+	global	bl			$data
+	global	el			$data
+	global	ms			$data
+	global	sc			$data
+	global	hh			$data
 	
 	global	graphs		${mindspark}out/graphs/
 	global	tables		${mindspark}out/tables/
-	
-	
 
 ///	subfolder globals
 
-	global	bl_temp		${mindspark}data/
-	global	bl_clean	${mindspark}data/
+	global	bl_temp		$data
+	global	bl_clean	$data
+
+	global	el_temp		$data
+	global	el_clean	$data
+
 	
-	global	el_temp		${mindspark}data/
-	global	el_clean	${mindspark}data/
-	
-	global	ms_temp		${mindspark}data/
-	global	ms_clean	${mindspark}data/
-	
-	global	sc_temp		${mindspark}data/
-	global	sc_clean	${mindspark}data/
-	
-	global	hh_temp		${mindspark}data/
-	global	hh_clean	${mindspark}data/
-	
-	
-	*Create local ado file
-	sysdir set PLUS "${mindspark}/ado"
-	
-	adopath ++ PLUS
-	adopath ++ BASE
+	global	ms_temp		$data
+	global	ms_clean	$data
+
+	global	sc_temp		$data
+	global	sc_clean	$data
+
+	global	hh_temp		$data
+	global	hh_clean	$data
 		
 }
 
@@ -373,7 +369,6 @@ if $gentables==1 {
 	/// load school results
 	
 		use ${sc_clean}sc_results, clear
-		rename school schoolid
 		
 	///	keep 2015-2016 school year
 	
@@ -530,7 +525,7 @@ if $gentables==1 {
 	
 	/// load sgi data
 	
-		use ${ms_clean}ms_ei_, clear
+		use ${ms_clean}ms_ei, clear
 							
 	///	drop duplicates
 		
@@ -588,7 +583,6 @@ if $gentables==1 {
 	/// load school results
 	
 		use ${sc_clean}sc_results, clear
-		rename school schoolid
 
 	///	gen dummy for non-rct students
 		
@@ -922,7 +916,10 @@ if $gentables==1 {
 /// table a.8: lee bounds estimates of ITT effects
 
 	/// run regressions
-	
+	/* NOTE: Two issues:
+	1. This output is not saved anywhere. 
+	2. The set seed above doesn't reproduce the bootstrapped s.e.-s. 
+	*/
 		reg m_theta_mle2 m_theta_mle1, robust
 		predict m_res, res
 		leebounds m_res treat,vce(analytic) tight(ms_center1) cie
@@ -1233,6 +1230,7 @@ if $gengraphs==1 {
 	/// load ms levels data
 
 		use ${ms_clean}ms_levels, clear
+		isid st_id
 
 		
 	///	merge with ms math questions
@@ -1319,14 +1317,8 @@ if $gengraphs==1 {
 	/// load ms levels data
 
 		use ${ms_clean}ms_levels, clear
+		isid st_id
 
-	///	drop duplicates
-
-		duplicates drop st_id, force
-	
-	///	merge with ms roster
-	
-		*mer 1:1 st_id using ${ms_clean}ms_roster, nogen keep(match)
 	
 		
 	///	merge with ms hindi questions
@@ -1366,7 +1358,6 @@ if $gengraphs==1 {
 	/// load school results
 	
 		use ${sc_clean}sc_results, clear
-		rename school schoolid
 
 	///	gen dummy for rct students
 		
@@ -1454,10 +1445,7 @@ if $gengraphs==1 {
 	/// load ms levels data
 
 		use ${ms_clean}ms_levels, clear
-
-	///	drop duplicates
-
-		duplicates drop st_id, force
+		isid st_id
 
 	/// merge w/j-pal data wide
 
@@ -1500,10 +1488,8 @@ if $gengraphs==1 {
 	/// load ms levels data
 
 		use ${ms_clean}ms_levels, clear
+		isid st_id
 
-		///	drop duplicates
-
-			duplicates drop st_id, force
 
 		///	merge with ms math questions
 		
@@ -1558,7 +1544,7 @@ if $gengraphs==1 {
 	/// reload ms levels data
 
 		use ${ms_clean}ms_levels, clear
-		
+		isid st_id
 		///	drop duplicates
 
 
